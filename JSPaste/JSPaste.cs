@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace JSPaste.Net
 {
@@ -11,7 +12,8 @@ namespace JSPaste.Net
 
         public static HttpClient httpClient = new HttpClient()
         {
-            BaseAddress = new Uri(ServerEndPoint)
+            BaseAddress = new Uri(ServerEndPoint),
+            DefaultRequestHeaders = { { "User-Agent", "JSPaste-CS Client" } }
         };
 
         public static void Send(string data, DocumentSettings settings = default) => Send(data, Encoding.UTF8, settings);
@@ -22,22 +24,30 @@ namespace JSPaste.Net
         {
             using (var req = new HttpRequestMessage(HttpMethod.Get, "/documents"))
             {
-                req.Version = HttpVersion.Version20;
             }
         }
 
-        public static string Get(string key) => Get(key, Encoding.UTF8);
+        public static async Task<string> Get(string key) => await Get(key, Encoding.UTF8);
 
-        public static string Get(string key, Encoding enc) => enc.GetString(GetRaw(key));
+        public static async Task<string> Get(string key, Encoding enc) => enc.GetString(await GetRaw(key));
 
-        public static byte[] GetRaw(string key)
+        public static async Task<byte[]> GetRaw(string key)
         {
             return null;
         }
 
-        public static bool Remove(string key, string secret)
+        public static async Task<bool> Remove(string key, string secret)
         {
             return false;
+        }
+
+        private static async Task<HttpResponseMessage> SendAsync(HttpRequestMessage req)
+        {
+            //Por si acaso en algun futuro tengo que modificar todas las requests que salen de la libreria
+
+            req.Version = HttpVersion.Version20;
+
+            return await httpClient.SendAsync(req);
         }
     }
 
@@ -52,12 +62,10 @@ namespace JSPaste.Net
     public class JSDocument
     {
         private string _key { get; set; }
-        public string Key
-        { get { return _key; } }
+        public string Key  { get { return _key; } }
 
         private string _secret { get; set; }
-        public string Secret
-        { get { return _secret; } }
+        public string Secret { get { return _secret; } }
 
         public JSDocument(string key, string secret)
         {

@@ -6,7 +6,7 @@ namespace JSPaste_Tests
     {
         private static void Main(string[] args)
         {
-            JSPasteClient.Send
+            JSPasteClient.Send(null);
         }
     }
 }

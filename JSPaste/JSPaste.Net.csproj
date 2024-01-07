@@ -4,14 +4,41 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <NoWin32Manifest>true</NoWin32Manifest>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>JSPaste Net Library</Title>
+    <Authors>Mrgaton</Authors>
+    <Description>An attempt to make a library to fully use all the functions of jspaste in an easy way</Description>
+    <PackageProjectUrl></PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Mrgaton/JSPaste-CS</RepositoryUrl>
+    <PackageTags>JSPaste; tnfAngel</PackageTags>
+    <PackageReleaseNotes>Aun no va</PackageReleaseNotes>
+    <FileVersion>$(VersionPrefix)</FileVersion>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <AssemblyVersion></AssemblyVersion>
+    <Version>0.0.1</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DebugType>full</DebugType>
+    <DebugType>none</DebugType>
+    <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>full</DebugType>
+    <DebugType>none</DebugType>
+    <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>
