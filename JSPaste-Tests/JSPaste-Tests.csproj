@@ -9,9 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="JSPaste">
-      <HintPath>..\JSPaste\bin\Debug\netstandard2.1\JSPaste.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\JSPaste\JSPaste.Net.csproj" />
   </ItemGroup>
 
 </Project>
