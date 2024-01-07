@@ -8,7 +8,7 @@
     <Title>JSPaste Net Library</Title>
     <Authors>Mrgaton</Authors>
     <Description>An attempt to make a library to fully use all the functions of jspaste in an easy way</Description>
-    <PackageProjectUrl></PackageProjectUrl>
+    <PackageProjectUrl>https://jspaste.eu/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Mrgaton/JSPaste-CS</RepositoryUrl>
     <PackageTags>JSPaste; tnfAngel</PackageTags>
     <PackageReleaseNotes>Aun no va</PackageReleaseNotes>
