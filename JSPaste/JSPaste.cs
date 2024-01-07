@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace JSPaste.Net
 {
-    public class JSPasteClient
+    public static class JSPasteClient
     {
         private const string ServerEndPoint = "https://jspaste.eu/";
 
-        public static HttpClient httpClient = new HttpClient()
+        public static HttpClient httpClient { get; set; } = new HttpClient()
         {
             BaseAddress = new Uri(ServerEndPoint),
             DefaultRequestHeaders = { { "User-Agent", "JSPaste-CS Client" } }
