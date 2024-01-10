@@ -6,11 +6,22 @@ namespace JSPaste_Tests
     {
         private static void Main(string[] args)
         {
-            var res = JSPasteClient.Send("diosss").Result;
+            JSPasteClient.ServerEndPoint = "http://[::1]:4000";
+
+            var data = File.ReadAllBytes("C:\\Users\\Mrgaton\\Downloads\\Release.zip");
+
+            var res = JSPasteClient.Send(data).Result;
 
             Console.WriteLine(res.Key);
 
-            var doc = res.Data().Result;
+            for(int i = 0; i < 929; i++)
+            {
+                var doc = res.DataRaw().Result;
+
+                Console.WriteLine(data.Length);
+                Console.WriteLine(doc.Length);
+                Console.WriteLine(data.SequenceEqual(doc));
+            }
         }
     }
 }

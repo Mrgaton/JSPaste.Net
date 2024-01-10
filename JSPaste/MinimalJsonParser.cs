@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -28,6 +29,8 @@ namespace JSPaste.Net
                     else if (bool.TryParse(content, out bool b)) value = b;
                     else value = content;
                 }
+
+                //Console.WriteLine(element.Key + " | " + (object)value);
 
                 result.Add(element.Key.Trim('\"'), (object)value);
             }
