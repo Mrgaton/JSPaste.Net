@@ -1,9 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
-using static System.Net.Mime.MediaTypeNames;
-
-namespace JSPaste_Tests
+﻿namespace JSPaste_Tests
 {
     internal class Program
     {
@@ -46,7 +41,6 @@ namespace JSPaste_Tests
 
             Console.WriteLine(result);*/
 
-
             /*foreach(var subList in result["lista"])
             {
                 foreach (var nums in subList)
@@ -59,8 +53,5 @@ namespace JSPaste_Tests
             //Console.WriteLine(result["lista"][0]);
             Console.ReadLine();
         }
-
-
-     
     }
 }

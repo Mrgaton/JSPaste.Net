@@ -102,6 +102,7 @@ namespace JSPaste.Net
 
             return sb.ToString().Trim();
         }
+
         private static string CleanString(string str)
         {
             StringBuilder output = new StringBuilder();
@@ -118,6 +119,7 @@ namespace JSPaste.Net
             }
             return output.ToString();
         }
+
         private static bool FirstAndLastEqualTo(string str, char c) => FirstAndLastEqualTo(str, c, c);
 
         private static bool FirstAndLastEqualTo(string str, char f, char s) => str[0] == f && str[str.Length - 1] == s;
