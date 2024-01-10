@@ -8,4 +8,8 @@
 
 # JSPaste
 
+Mi primera lib no me juzguen
+
+# Installation
+
 Install `dotnet add package JSPaste.Net`
