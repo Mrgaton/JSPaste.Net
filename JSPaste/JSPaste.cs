@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,51 +15,21 @@ namespace JSPaste.Net
             DefaultRequestHeaders = { { "User-Agent", "JSPaste-CS Client" } }
         };
 
-        public static Dictionary<string, object> ParseJson(ref string json)
-        {
-            json = json.Trim(new char[] { '{', '}' });
-
-            var deserealized = new Dictionary<string, object>();
-
-            foreach (string element in json.Split(','))
-            {
-                var splited = element.Split(':').Select(l => l.Trim()).ToArray();
-
-                string content = splited[1];
-
-                dynamic value = null;
-
-                if (!string.IsNullOrWhiteSpace(content))
-                {
-                    Console.WriteLine("\"" + content + "\"");
-
-                    if (content.StartsWith('\"') && content.EndsWith('\"')) value = content.Trim('\"');
-                    else if (content.All(char.IsDigit)) value = long.Parse(content);
-                    else if ((new string[] { "true", "false" }).Any(e => string.Equals(e, content, StringComparison.InvariantCultureIgnoreCase))) value = bool.Parse(content);
-                    else value = content;
-                }
-
-                deserealized.Add(splited[0].Trim('\"'), (object)value);
-            }
-
-            return deserealized;
-        }
-
         public static async Task<JSDocument> Send(string data, DocumentSettings settings = default) => await Send(data, Encoding.UTF8, settings);
 
         public static async Task<JSDocument> Send(string data, Encoding enc, DocumentSettings settings = default) => await Send(enc.GetBytes(data), settings);
 
         public static async Task<JSDocument> Send(byte[] data, DocumentSettings settings = default)
         {
-            using (var req = new HttpRequestMessage(HttpMethod.Get, "/documents"))
+            using (var req = new HttpRequestMessage(HttpMethod.Post, "/documents"))
             {
                 req.Content = new ByteArrayContent(data);
 
                 using (var res = await SendAsync(req))
                 {
-                    //await res.Content.ReadAsStringAsync()
+                    var response = MinimalJsonParser.ParseJson(await res.Content.ReadAsStringAsync());
 
-                    return null;
+                    return new JSDocument(response["key"], response["secret"]);
                 }
             }
         }
@@ -78,14 +46,30 @@ namespace JSPaste.Net
 
         public static async Task<byte[]> GetRaw(string key)
         {
-            return null;
+            using (var req = new HttpRequestMessage(HttpMethod.Get, "/documents/" + key))
+            {
+                using (var res = await SendAsync(req))
+                {
+                    return await res.Content.ReadAsByteArrayAsync();
+                }
+            }
         }
 
         public static async Task<bool> Remove(JSDocument doc) => await Remove(doc.Key, doc.Secret);
 
         public static async Task<bool> Remove(string key, string secret)
         {
-            return false;
+            using (var req = new HttpRequestMessage(HttpMethod.Delete, "/documents/" + key))
+            {
+                req.Headers.TryAddWithoutValidation("secret", secret);
+
+                using (var res = await SendAsync(req))
+                {
+                    var response = MinimalJsonParser.ParseJson(await res.Content.ReadAsStringAsync());
+
+                    return response["error"] == null;
+                }
+            }
         }
 
         private static async Task<HttpResponseMessage> SendAsync(HttpRequestMessage req)
