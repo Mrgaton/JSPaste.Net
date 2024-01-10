@@ -16,6 +16,7 @@ namespace JSPaste.Net
             BaseAddress = new Uri(ServerEndPoint),
             DefaultRequestHeaders = { { "User-Agent", "JSPaste-CS Client" } }
         };
+
         public static Dictionary<string, object> ParseJson(ref string json)
         {
             json = json.Trim(new char[] { '{', '}' });
@@ -45,6 +46,7 @@ namespace JSPaste.Net
 
             return deserealized;
         }
+
         public static async Task<JSDocument> Send(string data, DocumentSettings settings = default) => await Send(data, Encoding.UTF8, settings);
 
         public static async Task<JSDocument> Send(string data, Encoding enc, DocumentSettings settings = default) => await Send(enc.GetBytes(data), settings);
@@ -103,10 +105,12 @@ namespace JSPaste.Net
     public class JSDocument
     {
         private string _key { get; set; }
+
         public string Key
         { get { return _key; } }
 
         private string _secret { get; set; }
+
         public string Secret
         { get { return _secret; } }
 

@@ -18,7 +18,7 @@ namespace JSPaste_Tests
     },
     ""cosa"": true,
     ""number"": 4949,
-    ""casa"": ""hola que tyal"",
+    ""casa"": ""hola \\  que tyal\"" "",
     ""lista"": [
     [1, 2, 3],
     [4, 5, 6],
@@ -27,7 +27,9 @@ namespace JSPaste_Tests
 }
 ";
 
-            var result = ParseJson(json);
+            string x = "hola que tal  \\\" xd deveria funcionar\\\\";
+
+            var result = MinimalJsonParser.ParseJson(json);
 
             /*foreach (var element in result)
             {
@@ -45,17 +47,20 @@ namespace JSPaste_Tests
             Console.WriteLine(result);*/
 
 
-            foreach(var subList in result["lista"])
+            /*foreach(var subList in result["lista"])
             {
                 foreach (var nums in subList)
                 {
                     Console.Write(nums + ", ");
                 }
                 Console.WriteLine();
-            }
+            }*/
 
-            Console.WriteLine(result["lista"][0]);
+            //Console.WriteLine(result["lista"][0]);
             Console.ReadLine();
         }
+
+
+     
     }
 }
