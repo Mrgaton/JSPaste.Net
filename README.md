@@ -10,6 +10,6 @@
 
 Mi primera lib no me juzguen
 
-# Instalation
+# Installation
 
 Install `dotnet add package JSPaste.Net`
