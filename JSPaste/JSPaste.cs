@@ -7,8 +7,7 @@ namespace JSPaste.Net
 {
     public static class JSPasteClient
     {
-        private const string ServerEndPoint = "https://jspaste.eu/";
-
+        public static string ServerEndPoint { get; set; } = "https://jspaste.eu/";
         public static HttpClient httpClient { get; set; } = new HttpClient()
         {
             BaseAddress = new Uri(ServerEndPoint),
@@ -25,28 +24,30 @@ namespace JSPaste.Net
             {
                 req.Content = new ByteArrayContent(data);
 
+                if (settings.LiveSpan.TotalSeconds > 0) throw new Exception("Not implemented yet");
+
                 using (var res = await SendAsync(req))
                 {
                     var response = MinimalJsonParser.ParseJson(await res.Content.ReadAsStringAsync());
 
-                    return new JSDocument(response["key"], response["secret"]);
+                    return new JSDocument((string)response["key"], (string)response["secret"]);
                 }
             }
         }
 
-        public static async Task<string> Get(JSDocument doc) => await Get(doc.Key);
+        public static async Task<string> Get(string key) => await Get(new JSDocument(key));
 
-        public static async Task<string> Get(string key) => await Get(key, Encoding.UTF8);
+        public static async Task<string> Get(JSDocument doc) => await Get(doc, Encoding.UTF8);
 
-        public static async Task<string> Get(JSDocument doc, Encoding enc) => await Get(doc.Key, enc);
+        public static async Task<string> Get(string key, Encoding enc) => await Get(new JSDocument(key), enc);
 
-        public static async Task<string> Get(string key, Encoding enc) => enc.GetString(await GetRaw(key));
+        public static async Task<string> Get(JSDocument doc, Encoding enc) => enc.GetString(await GetRaw(doc));
 
-        public static async Task<byte[]> GetRaw(JSDocument doc) => await GetRaw(doc.Key);
+        public static async Task<byte[]> GetRaw(string key) => await GetRaw(new JSDocument(key));
 
-        public static async Task<byte[]> GetRaw(string key)
+        public static async Task<byte[]> GetRaw(JSDocument doc)
         {
-            using (var req = new HttpRequestMessage(HttpMethod.Get, "/documents/" + key))
+            using (var req = new HttpRequestMessage(HttpMethod.Get, "/documents/" + doc.Key))
             {
                 using (var res = await SendAsync(req))
                 {
@@ -82,26 +83,35 @@ namespace JSPaste.Net
 
     public class DocumentSettings
     {
-        public static TimeSpan LiveSpan { get; set; } = TimeSpan.Zero;
-        public static string? SecretMask { get; set; }
+        public TimeSpan LiveSpan { get; set; } = TimeSpan.Zero;
+        public string? SecretMask { get; set; }
     }
 
     public class JSDocument
     {
         private string _key { get; set; }
 
-        public string Key
-        { get { return _key; } }
+        public string Key { get { return _key; } }
 
         private string _secret { get; set; }
 
-        public string Secret
-        { get { return _secret; } }
+        public string Secret { get { return _secret; } }
 
-        public JSDocument(string key, string secret)
+        public string Password { get; set; }
+        public async Task<string> Data() => await JSPasteClient.Get(this);
+        public async Task<byte[]> DataRaw() => await JSPasteClient.GetRaw(this);
+        public async Task<bool> Remove() => await this.Remove(_secret);
+        public async Task<bool> Remove(string secret)
+        {
+            if (secret == null) throw new ArgumentNullException("Document secret is null");
+
+            return await JSPasteClient.Remove(_key,secret);
+        }
+        public JSDocument(string key, string secret = null, string acessKey = null)
         {
             _key = key;
             _secret = secret;
+            Password = acessKey;
         }
     }
 }

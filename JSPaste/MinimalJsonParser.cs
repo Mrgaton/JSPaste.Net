@@ -7,7 +7,7 @@ namespace JSPaste.Net
 {
     internal class MinimalJsonParser
     {
-        public static dynamic ParseJson(string json)
+        public static Dictionary<string, object> ParseJson(string json)
         {
             var stringsParsed = ParseElements(json);
 
