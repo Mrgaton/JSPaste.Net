@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -32,7 +31,7 @@ namespace JSPaste.Net
 
                 //Console.WriteLine(element.Key + " | " + (object)value);
 
-                result.Add(element.Key.Trim('\"'), (object)value);
+                result.Add(element.Key.ToLower(), (object)value);
             }
 
             return result;

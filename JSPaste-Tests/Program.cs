@@ -1,4 +1,5 @@
 ﻿using JSPaste.Net;
+using System.Text;
 
 namespace JSPaste_Tests
 {
@@ -14,13 +15,15 @@ namespace JSPaste_Tests
 
             Console.WriteLine(res.Key);
 
-            for(int i = 0; i < 929; i++)
+            for (int i = 0; i < 929; i++)
             {
                 var doc = res.DataRaw().Result;
 
+                bool re = JSPasteClient.Update(Encoding.UTF8.GetBytes(new Random().NextInt64().ToString()), res).Result;
+
                 Console.WriteLine(data.Length);
                 Console.WriteLine(doc.Length);
-                Console.WriteLine(data.SequenceEqual(doc));
+                Console.WriteLine(Encoding.UTF8.GetString(doc));
             }
         }
     }

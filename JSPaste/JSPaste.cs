@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net.Http;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,9 +7,19 @@ namespace JSPaste.Net
 {
     public static class JSPasteClient
     {
+#if DEBUG
         private static bool WriteResponses = true;
+#else
+        private static bool WriteResponses = false;
+#endif
 
-        public static string ServerEndPoint { get; set; } = "https://jspaste.eu";
+        private static string _serverEndPoint = "https://jspaste.eu";
+
+        public static string ServerEndPoint
+        {
+            get { return _serverEndPoint; }
+            set { _serverEndPoint = value.Trim().TrimEnd('/'); }
+        }
 
         public static HttpClient httpClient { get; set; } = new HttpClient()
         {
@@ -23,11 +32,16 @@ namespace JSPaste.Net
 
         public static async Task<JSDocument> Send(byte[] data, DocumentSettings settings = default)
         {
-            using (var req = new HttpRequestMessage(HttpMethod.Post, ServerEndPoint + "/documents"))
+            using (var req = new HttpRequestMessage(HttpMethod.Post, _serverEndPoint + "/documents"))
             {
                 req.Content = new ByteArrayContent(data);
 
-                //if (settings.LiveSpan.TotalSeconds > 0) throw new Exception("Not implemented yet");
+                if (settings != null)
+                {
+                    if (settings.LiveSpan.TotalSeconds > 0) throw new Exception("Not implemented yet");
+                    if (settings.Password != null) req.Headers.Add("password", settings.Password);
+                    if (settings.DesiredSecret != null) req.Headers.Add("secret", settings.DesiredSecret);
+                }
 
                 using (var res = await SendAsync(req))
                 {
@@ -36,6 +50,8 @@ namespace JSPaste.Net
                     if (WriteResponses) Console.WriteLine(responseString);
 
                     var response = MinimalJsonParser.ParseJson(responseString);
+
+                    if ((int)res.StatusCode >= 400) throw new Exception(responseString);
 
                     return new JSDocument((string)response["key"], (string)response["secret"]);
                 }
@@ -54,8 +70,10 @@ namespace JSPaste.Net
 
         public static async Task<byte[]> GetRaw(JSDocument doc)
         {
-            using (var req = new HttpRequestMessage(HttpMethod.Get, ServerEndPoint + "/documents/" + doc.Key + "/raw"))
+            using (var req = new HttpRequestMessage(HttpMethod.Get, _serverEndPoint + "/documents/" + doc.Key + "/raw"))
             {
+                if (doc.Password != null) req.Headers.TryAddWithoutValidation("password", doc.Password);
+
                 using (var res = await SendAsync(req))
                 {
                     return await res.Content.ReadAsByteArrayAsync();
@@ -67,7 +85,7 @@ namespace JSPaste.Net
 
         public static async Task<bool> Remove(string key, string secret)
         {
-            using (var req = new HttpRequestMessage(HttpMethod.Delete, ServerEndPoint + "documents/" + key))
+            using (var req = new HttpRequestMessage(HttpMethod.Delete, _serverEndPoint + "/documents/" + key))
             {
                 req.Headers.TryAddWithoutValidation("secret", secret);
 
@@ -79,7 +97,29 @@ namespace JSPaste.Net
 
                     var response = MinimalJsonParser.ParseJson(responseString);
 
-                    return response["error"] == null;
+                    return (int)res.StatusCode == 200;
+                }
+            }
+        }
+
+        public static async Task<bool> Update(byte[] data, JSDocument doc) => await Update(data, doc.Key, doc.Secret);
+
+        public static async Task<bool> Update(byte[] data, string key, string secret)
+        {
+            using (var req = new HttpRequestMessage(HttpMethod.Put, _serverEndPoint + "/documents/" + key))
+            {
+                req.Content = new ByteArrayContent(data);
+                req.Headers.TryAddWithoutValidation("secret", secret);
+
+                using (var res = await SendAsync(req))
+                {
+                    string responseString = await res.Content.ReadAsStringAsync();
+
+                    if (WriteResponses) Console.WriteLine(responseString);
+
+                    var response = MinimalJsonParser.ParseJson(responseString);
+
+                    return (int)res.StatusCode == 200;
                 }
             }
         }
@@ -95,7 +135,9 @@ namespace JSPaste.Net
     public class DocumentSettings
     {
         public TimeSpan LiveSpan { get; set; } = TimeSpan.Zero;
-        public string? SecretMask { get; set; }
+        public string? SecretMask { get; set; } = null;
+        public string? Password { get; set; } = null;
+        public string? DesiredSecret { get; set; } = null;
     }
 
     public class JSDocument
@@ -125,11 +167,11 @@ namespace JSPaste.Net
             return await JSPasteClient.Remove(_key, secret);
         }
 
-        public JSDocument(string key, string secret = null, string acessKey = null)
+        public JSDocument(string key, string secret = null, string password = null)
         {
             _key = key;
             _secret = secret;
-            Password = acessKey;
+            Password = password;
         }
     }
 }
