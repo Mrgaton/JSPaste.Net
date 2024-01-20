@@ -10,6 +10,8 @@
 
 Mi primera lib no me juzguen
 
+Nuget : https://www.nuget.org/packages/JSPaste.Net/
+
 # Installation
 
 Install `dotnet add package JSPaste.Net`
