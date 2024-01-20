@@ -2,6 +2,7 @@
 [![MIT License][img_license]][license]
 [![Downloads](https://img.shields.io/github/downloads/Mrgaton/JSPaste-CS/total?color=green)]()
 
+[![Nuget](https://img.shields.io/nuget/v/JSPaste.Net.svg)](https://www.nuget.org/packages/JSPaste.Net/) 
 [license]: LICENSE.md
 
 [img_license]: https://img.shields.io/github/license/Mrgaton/JSPaste-CS.svg?style=flat
@@ -9,8 +10,6 @@
 # JSPaste
 
 Mi primera lib no me juzguen
-
-Nuget : https://www.nuget.org/packages/JSPaste.Net/
 
 # Installation
 
