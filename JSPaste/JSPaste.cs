@@ -13,12 +13,12 @@ namespace JSPaste.Net
         private static bool WriteResponses = false;
 #endif
 
-        private static string _serverEndPoint = "https://jspaste.eu";
+        private static string _serverEndPoint = "https://jspaste.eu/api/v2";
 
         public static string ServerEndPoint
         {
             get { return _serverEndPoint; }
-            set { _serverEndPoint = value.Trim().TrimEnd('/'); }
+            set { _serverEndPoint = value.Trim().TrimEnd('/') + "/api/v2"; }
         }
 
         public static HttpClient httpClient { get; set; } = new HttpClient()
@@ -26,11 +26,11 @@ namespace JSPaste.Net
             DefaultRequestHeaders = { { "User-Agent", "JSPaste-CS Client" } }
         };
 
-        public static async Task<JSDocument> Send(string data, DocumentSettings settings = default) => await Send(data, Encoding.UTF8, settings);
+        public static async Task<JSDocument> Send(string data, DocumentSettings? settings = default) => await Send(data, Encoding.UTF8, settings);
 
-        public static async Task<JSDocument> Send(string data, Encoding enc, DocumentSettings settings = default) => await Send(enc.GetBytes(data), settings);
+        public static async Task<JSDocument> Send(string data, Encoding enc, DocumentSettings? settings = default) => await Send(enc.GetBytes(data), settings);
 
-        public static async Task<JSDocument> Send(byte[] data, DocumentSettings settings = default)
+        public static async Task<JSDocument> Send(byte[] data, DocumentSettings? settings = default)
         {
             using (var req = new HttpRequestMessage(HttpMethod.Post, _serverEndPoint + "/documents"))
             {
@@ -38,8 +38,8 @@ namespace JSPaste.Net
 
                 if (settings != null)
                 {
-                    if (settings.LiveSpan.TotalSeconds > 0) throw new Exception("Not implemented yet");
                     if (settings.Password != null) req.Headers.Add("password", settings.Password);
+                    if (settings.LifeTime.TotalSeconds >= 0) req.Headers.Add("lifetime", ((long)settings.LifeTime.TotalSeconds).ToString());
                     if (settings.DesiredSecret != null) req.Headers.Add("secret", settings.DesiredSecret);
                 }
 
@@ -58,7 +58,7 @@ namespace JSPaste.Net
             }
         }
 
-        public static async Task<string> Get(string key) => await Get(new JSDocument(key));
+        public static async Task<string> Get(string key, string? password = null) => await Get(new JSDocument(key, password));
 
         public static async Task<string> Get(JSDocument doc) => await Get(doc, Encoding.UTF8);
 
@@ -66,13 +66,13 @@ namespace JSPaste.Net
 
         public static async Task<string> Get(JSDocument doc, Encoding enc) => enc.GetString(await GetRaw(doc));
 
-        public static async Task<byte[]> GetRaw(string key) => await GetRaw(new JSDocument(key));
+        public static async Task<byte[]> GetRaw(JSDocument doc) => await GetRaw(doc.Key, doc.Password);
 
-        public static async Task<byte[]> GetRaw(JSDocument doc)
+        public static async Task<byte[]> GetRaw(string key, string? password = null)
         {
-            using (var req = new HttpRequestMessage(HttpMethod.Get, _serverEndPoint + "/documents/" + doc.Key + "/raw"))
+            using (var req = new HttpRequestMessage(HttpMethod.Get, _serverEndPoint + "/documents/" + key + "/raw"))
             {
-                if (doc.Password != null) req.Headers.TryAddWithoutValidation("password", doc.Password);
+                if (password != null) req.Headers.TryAddWithoutValidation("password", password);
 
                 using (var res = await SendAsync(req))
                 {
@@ -95,20 +95,25 @@ namespace JSPaste.Net
 
                     if (WriteResponses) Console.WriteLine(responseString);
 
-                    var response = MinimalJsonParser.ParseJson(responseString);
+                    //var response = MinimalJsonParser.ParseJson(responseString);
 
                     return (int)res.StatusCode == 200;
                 }
             }
         }
 
+        public static async Task<bool> Update(string data, JSDocument doc) => await Update(data, doc.Key, doc.Secret);
+
+        public static async Task<bool> Update(string data, string key, string secret) => await Update(Encoding.UTF8.GetBytes(data), key, secret);
+
         public static async Task<bool> Update(byte[] data, JSDocument doc) => await Update(data, doc.Key, doc.Secret);
 
         public static async Task<bool> Update(byte[] data, string key, string secret)
         {
-            using (var req = new HttpRequestMessage(HttpMethod.Put, _serverEndPoint + "/documents/" + key))
+            using (var req = new HttpRequestMessage(new HttpMethod("PATCH"), _serverEndPoint + "/documents/" + key))
             {
                 req.Content = new ByteArrayContent(data);
+
                 req.Headers.TryAddWithoutValidation("secret", secret);
 
                 using (var res = await SendAsync(req))
@@ -117,7 +122,7 @@ namespace JSPaste.Net
 
                     if (WriteResponses) Console.WriteLine(responseString);
 
-                    var response = MinimalJsonParser.ParseJson(responseString);
+                    //var response = MinimalJsonParser.ParseJson(responseString);
 
                     return (int)res.StatusCode == 200;
                 }
@@ -134,10 +139,10 @@ namespace JSPaste.Net
 
     public class DocumentSettings
     {
-        public TimeSpan LiveSpan { get; set; } = TimeSpan.Zero;
-        public string? SecretMask { get; set; } = null;
-        public string? Password { get; set; } = null;
-        public string? DesiredSecret { get; set; } = null;
+        public TimeSpan LifeTime { get; set; } = TimeSpan.MinValue;
+        public string? SecretMask { get; set; }
+        public string? Password { get; set; }
+        public string? DesiredSecret { get; set; }
     }
 
     public class JSDocument
@@ -147,12 +152,12 @@ namespace JSPaste.Net
         public string Key
         { get { return _key; } }
 
-        private string _secret { get; set; }
+        private string? _secret { get; set; }
 
-        public string Secret
+        public string? Secret
         { get { return _secret; } }
 
-        public string Password { get; set; }
+        public string? Password { get; set; }
 
         public async Task<string> Data() => await JSPasteClient.Get(this);
 
@@ -162,12 +167,21 @@ namespace JSPaste.Net
 
         public async Task<bool> Remove(string secret)
         {
-            if (secret == null) throw new ArgumentNullException("Document secret is null");
+            if (secret == null) throw new ArgumentNullException(nameof(secret));
 
             return await JSPasteClient.Remove(_key, secret);
         }
 
-        public JSDocument(string key, string secret = null, string password = null)
+        public async Task<bool> Update(string data, string secret) => await Update(Encoding.UTF8.GetBytes(data), secret);
+
+        public async Task<bool> Update(byte[] data, string secret)
+        {
+            if (secret == null) throw new ArgumentNullException(nameof(secret));
+
+            return await JSPasteClient.Update(data, _key, secret);
+        }
+
+        public JSDocument(string key, string? secret = null, string? password = null)
         {
             _key = key;
             _secret = secret;

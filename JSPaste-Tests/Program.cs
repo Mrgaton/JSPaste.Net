@@ -1,4 +1,5 @@
 ﻿using JSPaste.Net;
+using System.Diagnostics;
 using System.Text;
 
 namespace JSPaste_Tests
@@ -9,12 +10,25 @@ namespace JSPaste_Tests
         {
             JSPasteClient.ServerEndPoint = "http://[::1]:4000";
 
-            var data = File.ReadAllBytes("C:\\Users\\Mrgaton\\Downloads\\Release.zip");
+            var data = File.ReadAllBytes("C:\\Users\\Mrgaton\\Downloads\\teredoFix.bat");
 
-            var res = JSPasteClient.Send(data).Result;
+            DocumentSettings settings = new DocumentSettings()
+            {
+                LifeTime = TimeSpan.Zero,
+                Password = "jeje",
+                DesiredSecret = "COME PINGAS"
+            };
+
+            var res = JSPasteClient.Send(data, settings).Result;
+
+            Process.Start(new ProcessStartInfo()
+            {
+                FileName = JSPasteClient.ServerEndPoint + "/documents/" + res.Key + "/?p=" + settings.Password,
+                UseShellExecute = true
+            });
 
             Console.WriteLine(res.Key);
-
+            Console.ReadLine();
             for (int i = 0; i < 929; i++)
             {
                 var doc = res.DataRaw().Result;
@@ -23,7 +37,9 @@ namespace JSPaste_Tests
 
                 Console.WriteLine(data.Length);
                 Console.WriteLine(doc.Length);
-                Console.WriteLine(Encoding.UTF8.GetString(doc));
+                //Console.WriteLine(Encoding.UTF8.GetString(doc));
+
+                Thread.Sleep(1000);
             }
         }
     }

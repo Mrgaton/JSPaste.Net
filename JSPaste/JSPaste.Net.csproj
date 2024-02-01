@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Nullable>enable</Nullable>
     <NoWin32Manifest>true</NoWin32Manifest>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -10,24 +11,27 @@
     <Description>An attempt to make a library to fully use all the functions of jspaste in an easy way</Description>
     <PackageProjectUrl>https://jspaste.eu/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Mrgaton/JSPaste-CS</RepositoryUrl>
-    <PackageTags>JSPaste; tnfAngel</PackageTags>
-    <PackageReleaseNotes>Aun no va</PackageReleaseNotes>
+    <PackageTags>JSPaste; tnfAngel; pastebin; hastebin; </PackageTags>
+    <PackageReleaseNotes>Va a medias</PackageReleaseNotes>
     <FileVersion>$(VersionPrefix)</FileVersion>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <AssemblyVersion></AssemblyVersion>
-    <Version>0.0.2</Version>
+    <Version>0.0.4</Version>
     <PackageIcon>logo.png</PackageIcon>
+    <EnableNETAnalyzers>True</EnableNETAnalyzers>
+    <AnalysisLevel>preview-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DebugType>none</DebugType>
+    <DebugType>portable</DebugType>
     <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>none</DebugType>
+    <DebugType>portable</DebugType>
     <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
   </PropertyGroup>
 

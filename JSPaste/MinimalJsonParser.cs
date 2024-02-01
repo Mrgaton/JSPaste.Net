@@ -5,8 +5,9 @@ using System.Text;
 
 namespace JSPaste.Net
 {
-    internal class MinimalJsonParser
+    public class MinimalJsonParser
     {
+        //Should return dynamic but i guess that Net Standard 2.0 doest support it ¯\_(ツ)_/¯
         public static Dictionary<string, object> ParseJson(string json)
         {
             var stringsParsed = ParseElements(json);
@@ -17,7 +18,7 @@ namespace JSPaste.Net
             {
                 string content = element.Value;
 
-                dynamic value = null;
+                dynamic? value = null;
 
                 if (!string.IsNullOrWhiteSpace(content))
                 {
@@ -25,13 +26,13 @@ namespace JSPaste.Net
                     else if (FirstAndLastEqualTo(content, '{', '}')) value = ParseJson(content);
                     else if (FirstAndLastEqualTo(content, '[', ']')) value = ParseArray(content);
                     else if (content.All(char.IsDigit)) value = long.Parse(content);
-                    else if (bool.TryParse(content, out bool b)) value = b;
+                    else if (content.Length <= 5 && bool.TryParse(content, out bool b)) value = b;
                     else value = content;
                 }
 
                 //Console.WriteLine(element.Key + " | " + (object)value);
 
-                result.Add(element.Key.ToLower(), (object)value);
+                result.Add(element.Key, (object)value);
             }
 
             return result;
@@ -44,6 +45,8 @@ namespace JSPaste.Net
             while (sr.LeftLength > 0) elements.Add(ReadValue(ref sr));
 
             List<dynamic> list = new List<dynamic>();
+
+            if (elements.Count <= 0) return null;
 
             int structType = 0;
 
@@ -61,6 +64,7 @@ namespace JSPaste.Net
                 else if (structType == 4) list.Add((object)ParseJson(element));
                 else if (structType == 5) list.Add(ParseArray(element));
             }
+
             sr.Dispose();
 
             return list;
@@ -69,6 +73,7 @@ namespace JSPaste.Net
         private static Dictionary<string, string> ParseElements(string json)
         {
             var dict = new Dictionary<string, string>();
+
             var sr = new StringStream(json);
 
             sr.ReadUntil('{');
@@ -91,15 +96,23 @@ namespace JSPaste.Net
             StringBuilder sb = new StringBuilder();
 
             int subElements = 0;
+            char lastChar = default;
+            bool inQuotes = false;
 
             while (sr.LeftLength > 0)
             {
                 char c = sr.ReadChar();
-                if (c == ',' && subElements == 0) break;
+
+                if (c == '\"' && lastChar != '\\') inQuotes = !inQuotes;
+
+                if (c == ',' && subElements == 0 && !inQuotes) break;
+
                 if (c == '{' || c == '[') subElements++;
                 if (c == '}' || c == ']') subElements--;
+
                 if (subElements < 0) break;
-                sb.Append(c);
+
+                sb.Append(lastChar = c);
             }
 
             return sb.ToString().Trim();
@@ -108,23 +121,11 @@ namespace JSPaste.Net
         private static string CleanString(string str)
         {
             StringBuilder output = new StringBuilder();
-            bool ad = false;
-            foreach (var c in str)
-            {
-                if (!ad && c == '\\')
-                {
-                    ad = true;
-                    continue;
-                }
-                output.Append(c);
-                ad = false;
-            }
+            for (int i = 0; i < str.Length; i++) output.Append(str[i] == '\\' ? str[i += 1] : str[i]);
             return output.ToString();
         }
 
-        private static bool FirstAndLastEqualTo(string str, char c) => FirstAndLastEqualTo(str, c, c);
-
-        private static bool FirstAndLastEqualTo(string str, char f, char s) => str[0] == f && str[str.Length - 1] == s;
+        private static bool FirstAndLastEqualTo(string str, char f, char s = default) => str[0] == f && str[str.Length - 1] == (s == default ? f : s);
 
         private static string CutEdges(string str, int lengh = 1) => str.Substring(lengh, str.Length - (lengh + 1));
 
@@ -132,7 +133,8 @@ namespace JSPaste.Net
         {
             public StringStream(string str, Encoding enc = null)
             {
-                Write((enc ?? Encoding.UTF8).GetBytes(str));
+                var data = (enc ?? Encoding.UTF8).GetBytes(str);
+                Write(data, 0, data.Length);
                 Position = 0;
             }
 
