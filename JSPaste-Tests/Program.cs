@@ -6,6 +6,7 @@ namespace JSPaste_Tests
 {
     internal class Program
     {
+        //No esperes nada profesional en tests
         private static void Main(string[] args)
         {
             JSPasteClient.ServerEndPoint = "http://[::1]:4000";
@@ -23,7 +24,7 @@ namespace JSPaste_Tests
 
             Process.Start(new ProcessStartInfo()
             {
-                FileName = JSPasteClient.ServerEndPoint + "/documents/" + res.Key + "/?p=" + settings.Password,
+                FileName = res.Url,
                 UseShellExecute = true
             });
 

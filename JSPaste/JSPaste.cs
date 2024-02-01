@@ -53,7 +53,7 @@ namespace JSPaste.Net
 
                     if ((int)res.StatusCode >= 400) throw new Exception(responseString);
 
-                    return new JSDocument((string)response["key"], (string)response["secret"]);
+                    return new JSDocument((string)response["key"], (string)response["secret"], (settings != null ? settings.Password : null));
                 }
             }
         }
@@ -158,6 +158,9 @@ namespace JSPaste.Net
         { get { return _secret; } }
 
         public string? Password { get; set; }
+
+        public string Url { get { 
+                return JSPasteClient.ServerEndPoint + "/documents/" + this.Key + (string.IsNullOrEmpty(Password) ? null : "/?p=" + this.Password); } }
 
         public async Task<string> Data() => await JSPasteClient.Get(this);
 
