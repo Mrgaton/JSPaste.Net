@@ -149,11 +149,11 @@ namespace JSPaste.Net
         { get { return _key; } }
 
         public byte[] KeyBytes
-        { 
-            get 
-            { 
+        {
+            get
+            {
                 return Base64Url.FromBase64Url(_key);
-            } 
+            }
         }
 
         private string? _secret { get; set; }
@@ -163,13 +163,15 @@ namespace JSPaste.Net
 
         public string? Password { get; set; }
 
-        public string Url { get {  return JSPasteClient.ServerEndPoint + "/documents/" + this.Key + (string.IsNullOrEmpty(Password) ? null : "/?p=" + this.Password); } }
+        public string Url
+        { get { return JSPasteClient.ServerEndPoint + "/documents/" + this.Key + (string.IsNullOrEmpty(Password) ? null : "/?p=" + this.Password); } }
 
         public async Task<string> Data() => await JSPasteClient.Get(this);
 
         public async Task<byte[]> DataRaw() => await JSPasteClient.GetRaw(this);
 
         public async Task<bool> Remove() => await Remove(_secret);
+
         public async Task<bool> Remove(string secret)
         {
             if (secret == null) throw new ArgumentNullException(nameof(secret));
@@ -192,6 +194,7 @@ namespace JSPaste.Net
             _secret = secret;
             Password = password;
         }
+
         public JSDocument(byte[] key, string? secret = null, string? password = null)
         {
             _key = Base64Url.ToBase64Url(key);
@@ -199,6 +202,7 @@ namespace JSPaste.Net
             Password = password;
         }
     }
+
     internal static class Base64Url
     {
         public static string ToBase64Url(byte[] data) => Convert.ToBase64String(data).Trim('=').Replace('+', '-').Replace('/', '_');
