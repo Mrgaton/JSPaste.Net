@@ -11,7 +11,7 @@ namespace JSPaste_Tests
         {
             JSPasteClient.ServerEndPoint = "http://[::1]:4000";
 
-            var data = File.ReadAllBytes("C:\\Users\\Mrgaton\\Downloads\\teredoFix.bat");
+            var data = File.ReadAllBytes("C:\\Users\\Mrgaton\\Downloads\\frame_0_delay-0.1s.png");
 
             DocumentSettings settings = new DocumentSettings()
             {
@@ -21,6 +21,14 @@ namespace JSPaste_Tests
             };
 
             var res = JSPasteClient.Send(data, settings).Result;
+
+
+            Console.WriteLine();
+            foreach(var b in res.KeyBytes)
+            {
+                Console.Write(b + ", ");
+            }
+            Console.WriteLine();
 
             Process.Start(new ProcessStartInfo()
             {
