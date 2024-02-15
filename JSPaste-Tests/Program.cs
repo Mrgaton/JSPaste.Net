@@ -17,7 +17,7 @@ namespace JSPaste_Tests
             {
                 LifeTime = TimeSpan.Zero,
                 Password = "jeje",
-                DesiredSecret = "COME PINGAS"
+                DesiredSecret = "COME PINGAS",
             };
 
             var res = JSPasteClient.Send(data, settings).Result;

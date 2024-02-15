@@ -104,7 +104,6 @@ namespace JSPaste.Net
                 char c = sr.ReadChar();
 
                 if (c == '\"' && lastChar != '\\') inQuotes = !inQuotes;
-
                 if (c == ',' && subElements == 0 && !inQuotes) break;
 
                 if (c == '{' || c == '[') subElements++;
