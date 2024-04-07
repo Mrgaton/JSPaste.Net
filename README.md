@@ -5,9 +5,9 @@
 
 
 
-# JSPaste
+# JSPaste.Net
 
-Mi primera lib no me juzguen
+A lib to interact with JSPaste API
 
 # Installation
 
