@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JSPaste.Net", "JSPaste\JSPaste.Net.csproj", "{880DE221-1391-4A6F-A33A-8808EB6AAE7C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JSPasteNet", "JSPaste\JSPasteNet.csproj", "{880DE221-1391-4A6F-A33A-8808EB6AAE7C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JSPaste-Tests", "JSPaste-Tests\JSPaste-Tests.csproj", "{CD75F791-C3AF-4A2A-B049-B8CA2C8D7F24}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JSPaste-Tests", "JSPaste-Tests\JSPaste-Tests.csproj", "{CD75F791-C3AF-4A2A-B049-B8CA2C8D7F24}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

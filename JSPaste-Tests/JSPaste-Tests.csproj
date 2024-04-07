@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\JSPaste\JSPaste.Net.csproj" />
+    <ProjectReference Include="..\JSPaste\JSPasteNet.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,4 @@
-﻿using JSPaste.Net;
-using System.Diagnostics;
+﻿using JSPasteNet;
 using System.Text;
 
 namespace JSPaste_Tests
@@ -9,32 +8,36 @@ namespace JSPaste_Tests
         //No esperes nada profesional en tests
         private static void Main(string[] args)
         {
-            JSPasteClient.ServerEndPoint = "http://[::1]:4000";
+         
+                JSPasteClient.ServerEndPoint = "http://[::1]:4000";
 
-            var data = File.ReadAllBytes("C:\\Users\\Mrgaton\\Downloads\\frame_0_delay-0.1s.png");
+            var data = File.ReadAllBytes("C:\\Users\\Mrgaton\\Downloads\\SKlauncher-3.2.exe");
 
             DocumentSettings settings = new DocumentSettings()
             {
-                LifeTime = TimeSpan.Zero,
-                Password = "jeje",
-                DesiredSecret = "COME PINGAS",
+                Password = "whatt",
+                Secret = "COME PINGAS",
+                KeyLength = 2
             };
 
-            var res = JSPasteClient.Send(data, settings).Result;
 
+            var res = JSPasteClient.Publish(data, settings).Result;
 
             Console.WriteLine();
-            foreach(var b in res.KeyBytes)
+
+            foreach (var b in res.KeyBytes)
             {
                 Console.Write(b + ", ");
             }
             Console.WriteLine();
 
-            Process.Start(new ProcessStartInfo()
+            /*Process.Start(new ProcessStartInfo()
             {
-                FileName = res.Url,
+                FileName = res.RawUrl,
                 UseShellExecute = true
-            });
+            });*/
+
+            Console.WriteLine(res.Check().Result);
 
             Console.WriteLine(res.Key);
             Console.ReadLine();
@@ -42,7 +45,7 @@ namespace JSPaste_Tests
             {
                 var doc = res.DataRaw().Result;
 
-                bool re = JSPasteClient.Update(Encoding.UTF8.GetBytes(new Random().NextInt64().ToString()), res).Result;
+                bool re = JSPasteClient.Edit(res, Encoding.UTF8.GetBytes(new Random().NextInt64().ToString())).Result;
 
                 Console.WriteLine(data.Length);
                 Console.WriteLine(doc.Length);

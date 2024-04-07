@@ -3,47 +3,52 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JSPaste.Net
+namespace JSPasteNet
 {
     public static class JSPasteClient
     {
+        private static Encoding DefaultEncoding = DefaultEncoding;
+
 #if DEBUG
-        private static bool WriteResponses = true;
+        private const bool WriteResponses = true;
 #else
-        private static bool WriteResponses = false;
+        private const bool WriteResponses = false;
 #endif
 
         private static string _serverEndPoint = "https://jspaste.eu/api/v2";
 
         public static string ServerEndPoint
         {
-            get { return _serverEndPoint; }
-            set { _serverEndPoint = value.Trim().TrimEnd('/') + "/api/v2"; }
+            get => _serverEndPoint;
+            set { _serverEndPoint = !value.ToLower().Contains("/api/v") ? value.Trim().TrimEnd('/') + "/api/v2" : value.Trim().TrimEnd('/'); }
         }
 
         public static HttpClient httpClient { get; set; } = new HttpClient()
         {
-            DefaultRequestHeaders = { { "User-Agent", "JSPaste-CS Client" } }
+            DefaultRequestHeaders = { { "User-Agent", "JSPaste-CS Client" } },
+            Timeout = TimeSpan.FromSeconds(30)
         };
 
-        public static async Task<JSDocument> Send(string data, DocumentSettings? settings = default) => await Send(data, Encoding.UTF8, settings);
+        public static async Task<JSDocument> Publish(string data, DocumentSettings? settings = default) => await Publish(data, DefaultEncoding, settings);
 
-        public static async Task<JSDocument> Send(string data, Encoding enc, DocumentSettings? settings = default) => await Send(enc.GetBytes(data), settings);
+        public static async Task<JSDocument> Publish(string data, Encoding enc, DocumentSettings? settings = default) => await Publish(enc.GetBytes(data), settings);
 
-        public static async Task<JSDocument> Send(byte[] data, DocumentSettings? settings = default)
+        public static async Task<JSDocument> Publish(byte[] data, DocumentSettings? settings = default)
         {
-            using (var req = new HttpRequestMessage(HttpMethod.Post, _serverEndPoint + "/documents"))
+            using (HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Post, _serverEndPoint + "/documents"))
             {
                 req.Content = new ByteArrayContent(data);
 
                 if (settings != null)
                 {
+                    if (settings.Key != null) req.Headers.Add("key", settings.Key);
+                    if (settings.KeyLength != null && settings.KeyLength > 0) req.Headers.Add("keyLength", settings.KeyLength.ToString());
+                    if (settings.Secret != null) req.Headers.Add("secret", settings.Secret);
                     if (settings.Password != null) req.Headers.Add("password", settings.Password);
-                    if (settings.LifeTime.TotalSeconds >= 0) req.Headers.Add("lifetime", ((long)settings.LifeTime.TotalSeconds).ToString());
-                    if (settings.DesiredSecret != null) req.Headers.Add("secret", settings.DesiredSecret);
+                    if (settings.LifeTime.TotalSeconds > 0) req.Headers.Add("lifetime", ((long)settings.LifeTime.TotalSeconds).ToString());
                 }
 
-                using (var res = await SendAsync(req))
+                using (HttpResponseMessage res = await SendAsync(req))
                 {
                     string responseString = await res.Content.ReadAsStringAsync();
 
@@ -58,11 +63,11 @@ namespace JSPaste.Net
             }
         }
 
-        public static async Task<string> Get(string key, string? password = null) => await Get(new JSDocument(key, password));
+        public static async Task<string> Get(string key, string? password = null) => DefaultEncoding.GetString(await GetRaw(key, password));
 
-        public static async Task<string> Get(JSDocument doc) => await Get(doc, Encoding.UTF8);
+        public static async Task<string> Get(JSDocument doc) => await Get(doc, DefaultEncoding);
 
-        public static async Task<string> Get(string key, Encoding enc) => await Get(new JSDocument(key), enc);
+        public static async Task<string> Get(string key, Encoding enc, string? password = null) => enc.GetString(await GetRaw(key,password));
 
         public static async Task<string> Get(JSDocument doc, Encoding enc) => enc.GetString(await GetRaw(doc));
 
@@ -74,7 +79,7 @@ namespace JSPaste.Net
             {
                 if (password != null) req.Headers.TryAddWithoutValidation("password", password);
 
-                using (var res = await SendAsync(req))
+                using (HttpResponseMessage res = await SendAsync(req))
                 {
                     return await res.Content.ReadAsByteArrayAsync();
                 }
@@ -85,11 +90,11 @@ namespace JSPaste.Net
 
         public static async Task<bool> Remove(string key, string secret)
         {
-            using (var req = new HttpRequestMessage(HttpMethod.Delete, _serverEndPoint + "/documents/" + key))
+            using (HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Delete, _serverEndPoint + "/documents/" + key))
             {
                 req.Headers.TryAddWithoutValidation("secret", secret);
 
-                using (var res = await SendAsync(req))
+                using (HttpResponseMessage res = await SendAsync(req))
                 {
                     string responseString = await res.Content.ReadAsStringAsync();
 
@@ -100,21 +105,38 @@ namespace JSPaste.Net
             }
         }
 
-        public static async Task<bool> Update(string data, JSDocument doc) => await Update(data, doc.Key, doc.Secret);
+        public static async Task<bool> Edit(JSDocument doc, string data) => await Edit(data, doc.Key, doc.Secret);
 
-        public static async Task<bool> Update(string data, string key, string secret) => await Update(Encoding.UTF8.GetBytes(data), key, secret);
+        public static async Task<bool> Edit(string key, string secret, string data) => await Edit(key, secret, DefaultEncoding.GetBytes(data));
 
-        public static async Task<bool> Update(byte[] data, JSDocument doc) => await Update(data, doc.Key, doc.Secret);
+        public static async Task<bool> Edit(JSDocument doc, byte[] data) => await Edit(doc.Key, doc.Secret, data);
 
-        public static async Task<bool> Update(byte[] data, string key, string secret)
+        public static async Task<bool> Edit(string key, string secret, byte[] data)
         {
-            using (var req = new HttpRequestMessage(new HttpMethod("PATCH"), _serverEndPoint + "/documents/" + key))
+            using (HttpRequestMessage req = new HttpRequestMessage(new HttpMethod("PATCH"), _serverEndPoint + "/documents/" + key))
             {
                 req.Content = new ByteArrayContent(data);
 
                 req.Headers.TryAddWithoutValidation("secret", secret);
 
-                using (var res = await SendAsync(req))
+                using (HttpResponseMessage res = await SendAsync(req))
+                {
+                    string responseString = await res.Content.ReadAsStringAsync();
+
+                    if (WriteResponses) Console.WriteLine(responseString);
+
+                    return (int)res.StatusCode == 200;
+                }
+            }
+        }
+
+        public static async Task<bool> Check(JSDocument doc) => await Check(doc.Key);
+
+        public static async Task<bool> Check(string key)
+        {
+            using (HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Get, _serverEndPoint + "/documents/" + key + "/exists"))
+            {
+                using (HttpResponseMessage res = await SendAsync(req))
                 {
                     string responseString = await res.Content.ReadAsStringAsync();
 
@@ -127,7 +149,7 @@ namespace JSPaste.Net
 
         private static async Task<HttpResponseMessage> SendAsync(HttpRequestMessage req)
         {
-            //Por si acaso en algun futuro tengo que modificar todas las requests que salen de la libreria
+            //Por si acaso en algun futuro tengo que modificar todas las requests que salen de la lib
 
             return await httpClient.SendAsync(req);
         }
@@ -135,36 +157,30 @@ namespace JSPaste.Net
 
     public class DocumentSettings
     {
-        public TimeSpan LifeTime { get; set; } = TimeSpan.MinValue;
-        public string? SecretMask { get; set; }
+        public string? Key { get; set; }
+        public int? KeyLength { get; set; }
+        public string? Secret { get; set; }
         public string? Password { get; set; }
-        public string? DesiredSecret { get; set; }
+        public TimeSpan LifeTime { get; set; } = TimeSpan.MinValue;
     }
 
     public class JSDocument
     {
         private string _key { get; set; }
 
-        public string Key
-        { get { return _key; } }
+        public string Key => _key;
 
-        public byte[] KeyBytes
-        {
-            get
-            {
-                return Base64Url.FromBase64Url(_key);
-            }
-        }
+        public byte[] KeyBytes => Base64Url.FromBase64Url(_key);
 
         private string? _secret { get; set; }
 
-        public string? Secret
-        { get { return _secret; } }
+        public string? Secret { get => _secret; }
 
         public string? Password { get; set; }
 
-        public string Url
-        { get { return JSPasteClient.ServerEndPoint + "/documents/" + this.Key + (string.IsNullOrEmpty(Password) ? null : "/?p=" + this.Password); } }
+        public string Url => JSPasteClient.ServerEndPoint + "/documents/" + this.Key + (string.IsNullOrEmpty(Password) ? null : "/?p=" + this.Password);
+
+        public string RawUrl => JSPasteClient.ServerEndPoint + "/documents/" + this.Key + "/raw" + (string.IsNullOrEmpty(Password) ? null : "/?p=" + this.Password);
 
         public async Task<string> Data() => await JSPasteClient.Get(this);
 
@@ -179,14 +195,16 @@ namespace JSPaste.Net
             return await JSPasteClient.Remove(_key, secret);
         }
 
-        public async Task<bool> Update(string data, string secret) => await Update(Encoding.UTF8.GetBytes(data), secret);
+        public async Task<bool> Edit(string data, string secret) => await Edit(Encoding.UTF8.GetBytes(data), secret);
 
-        public async Task<bool> Update(byte[] data, string secret)
+        public async Task<bool> Edit(byte[] data, string secret)
         {
             if (secret == null) throw new ArgumentNullException(nameof(secret));
 
-            return await JSPasteClient.Update(data, _key, secret);
+            return await JSPasteClient.Edit(_key, secret, data);
         }
+
+        public async Task<bool> Check() => await JSPasteClient.Check(this);
 
         public JSDocument(string key, string? secret = null, string? password = null)
         {
