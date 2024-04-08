@@ -5,7 +5,7 @@ using System.Text;
 
 namespace JSPasteNet
 {
-    public class MinimalJsonParser
+    internal class MinimalJsonParser
     {
         //Should return dynamic but i guess that Net Standard 2.0 doest support it ¯\_(ツ)_/¯
         public static Dictionary<string, object> ParseJson(string json)

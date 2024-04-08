@@ -3,13 +3,13 @@ using System.Text;
 
 namespace JSPaste_Tests
 {
-    internal class Program
+    internal static class Program
     {
         //No esperes nada profesional en tests
         private static void Main(string[] args)
         {
-         
-                JSPasteClient.ServerEndPoint = "http://[::1]:4000";
+            JSPasteNet.
+                   JSPasteClient.ServerEndPoint = "http://[::1]:4000";
 
             var data = File.ReadAllBytes("C:\\Users\\Mrgaton\\Downloads\\SKlauncher-3.2.exe");
 
@@ -19,7 +19,6 @@ namespace JSPaste_Tests
                 Secret = "COME PINGAS",
                 KeyLength = 2
             };
-
 
             var res = JSPasteClient.Publish(data, settings).Result;
 

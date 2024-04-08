@@ -67,7 +67,7 @@ namespace JSPasteNet
 
         public static async Task<string> Get(JSDocument doc) => await Get(doc, DefaultEncoding);
 
-        public static async Task<string> Get(string key, Encoding enc, string? password = null) => enc.GetString(await GetRaw(key,password));
+        public static async Task<string> Get(string key, Encoding enc, string? password = null) => enc.GetString(await GetRaw(key, password));
 
         public static async Task<string> Get(JSDocument doc, Encoding enc) => enc.GetString(await GetRaw(doc));
 
