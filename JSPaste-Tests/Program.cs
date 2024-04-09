@@ -8,16 +8,16 @@ namespace JSPaste_Tests
         //No esperes nada profesional en tests
         private static void Main(string[] args)
         {
-            JSPasteNet.
-                   JSPasteClient.ServerEndPoint = "http://[::1]:4000";
+            //JSPasteNet.JSPasteClient.ServerEndPoint = "http://[::1]:4000";
 
-            var data = File.ReadAllBytes("C:\\Users\\Mrgaton\\Downloads\\SKlauncher-3.2.exe");
-
+            var data = "RFNGaWxlcy5kZXBzLmpzb24:HwDEuKFYLw76_x8CBDlUXI2cBOQB/-v8fAgQ5VFy1HAR4AQ:biAEao-VEhA:yMIXhemQjfynk3XXsFa45rx3wg3ADFLkqxE3p6PNBtnwhU5Qsall9M8y8XQBuN8K9wwR"; //File.ReadAllBytes("C:\\Users\\Mrgaton\\Downloads\\SKlauncher-3.2.exe");
+                
             DocumentSettings settings = new DocumentSettings()
             {
+                LifeTime = TimeSpan.FromHours(2),
                 Password = "whatt",
                 Secret = "COME PINGAS",
-                KeyLength = 2
+                KeyLength = 32
             };
 
             var res = JSPasteClient.Publish(data, settings).Result;
@@ -40,6 +40,7 @@ namespace JSPaste_Tests
 
             Console.WriteLine(res.Key);
             Console.ReadLine();
+
             for (int i = 0; i < 929; i++)
             {
                 var doc = res.DataRaw().Result;

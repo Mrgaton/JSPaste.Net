@@ -18,7 +18,7 @@
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <AssemblyVersion></AssemblyVersion>
-    <Version>0.0.5</Version>
+    <Version>0.0.6</Version>
     <PackageIcon>logo.png</PackageIcon>
     <EnableNETAnalyzers>True</EnableNETAnalyzers>
     <AnalysisLevel>preview-recommended</AnalysisLevel>

@@ -7,7 +7,7 @@ namespace JSPasteNet
 {
     public static class JSPasteClient
     {
-        private static Encoding DefaultEncoding = DefaultEncoding;
+        public static Encoding DefaultEncoding = Encoding.UTF8;
 
 #if DEBUG
         private const bool WriteResponses = true;
@@ -157,11 +157,23 @@ namespace JSPasteNet
 
     public class DocumentSettings
     {
+        private static int DefaultKeyLength = int.MinValue;
+        private static string DefaultSecret = null;
+        private static string DefaultPassword = null;
+        private static TimeSpan DefaultLifeTime = TimeSpan.MinValue;
+
+        public DocumentSettings()
+        {
+            if (DefaultKeyLength > 0) this.KeyLength = DefaultKeyLength;
+            if (DefaultSecret != null) this.Secret = DefaultSecret;
+            if (DefaultPassword != null) this.Password = DefaultPassword;
+            if (DefaultLifeTime > TimeSpan.MinValue) this.LifeTime = DefaultLifeTime;
+        }
         public string? Key { get; set; }
         public int? KeyLength { get; set; }
         public string? Secret { get; set; }
         public string? Password { get; set; }
-        public TimeSpan LifeTime { get; set; } = TimeSpan.MinValue;
+        public TimeSpan LifeTime { get; set; }
     }
 
     public class JSDocument
