@@ -5,7 +5,7 @@ using System.Text;
 
 namespace JSPasteNet
 {
-    internal class MinimalJsonParser
+    public class MinimalJsonParser
     {
         //Should return dynamic but i guess that Net Standard 2.0 doest support it ¯\_(ツ)_/¯
         public static Dictionary<string, object> ParseJson(string json)
@@ -137,12 +137,12 @@ namespace JSPasteNet
                 Position = 0;
             }
 
-            public long LeftLength
-            { get { return Length - Position; } }
+            public long LeftLength { get => Length - Position; }
 
             public char ReadChar()
             {
                 int result = ReadByte();
+
                 return result == -1 ? throw new EndOfStreamException() : (char)result;
             }
 
