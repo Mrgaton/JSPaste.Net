@@ -99,7 +99,12 @@ namespace JSPasteNet
             }
         }
 
-        public static async Task<bool> Remove(JSDocument doc) => await Remove(doc.Key, doc.Secret);
+        public static async Task<bool> Remove(JSDocument doc)
+        {
+            if (string.IsNullOrWhiteSpace(doc.Password)) throw new ArgumentException(nameof(doc.Secret));
+
+            return await Remove(doc.Key, doc.Secret);
+        }
 
         public static async Task<bool> Remove(string key, string secret)
         {
