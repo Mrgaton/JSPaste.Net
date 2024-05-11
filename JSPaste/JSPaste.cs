@@ -30,7 +30,7 @@ namespace JSPasteNet
 
                 _serverEndPoint = start + value.TrimEnd('/') + (value.TrimEnd('/').EndsWith("/api/v2/documents", StringComparison.InvariantCultureIgnoreCase) ? null : "/api/v2/documents");
 
-                if (_serverEndPoint[_serverEndPoint.Length - 1] == '/') _serverEndPoint.Substring(0, ServerEndPoint.Length - 2);
+                if (_serverEndPoint[_serverEndPoint.Length - 1] == '/') _serverEndPoint = _serverEndPoint.Substring(0, ServerEndPoint.Length - 2);
             }
         }
 
