@@ -1,6 +1,5 @@
 ﻿using JSPasteNet;
 using System.Diagnostics;
-using System.Text;
 
 namespace JSPaste_Tests
 {
@@ -11,7 +10,7 @@ namespace JSPaste_Tests
         {
             JSPasteNet.JSPasteClient.ServerEndPoint = "http://[::1]:4000";
             //JSPasteNet.JSPasteClient.ServerEndPoint = "https://api.inetol.net/jspaste/v2";
-            
+
             //var data = File.ReadAllBytes("C:\\Users\\Mrgaton\\Mega\\Programas\\Programas de CSharp\\AsciiPlayer\\AsciiPlayer\\bin\\Debug\\buffer.txt");
             var data = File.ReadAllBytes("C:\\Users\\mrgaton\\Downloads\\IMG20240415184420.jpg");
 
@@ -50,8 +49,7 @@ namespace JSPaste_Tests
 
             Console.WriteLine(res.Check().Result);
 
-
-            if (res.RawUrl.StartsWith("https://",StringComparison.InvariantCultureIgnoreCase))
+            if (res.RawUrl.StartsWith("https://", StringComparison.InvariantCultureIgnoreCase))
             {
                 Process.Start(new ProcessStartInfo()
                 {

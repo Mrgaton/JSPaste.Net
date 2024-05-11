@@ -35,7 +35,7 @@ namespace JSPasteNet
 
                 //Console.WriteLine(element.Key + " | " + (object)value);
 
-                result.Add(element.Key, value);
+                result.Add(element.Key, value as object);
             }
 
             return result;
