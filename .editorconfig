@@ -5,3 +5,6 @@ dotnet_diagnostic.IDE0011.severity = silent
 
 # IDE0022: Usar cuerpo del bloque para el método
 dotnet_diagnostic.IDE0022.severity = none
+
+# IDE0046: Convertir a expresión condicional
+dotnet_diagnostic.IDE0046.severity = none
