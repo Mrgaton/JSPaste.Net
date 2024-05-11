@@ -50,11 +50,15 @@ namespace JSPaste_Tests
 
             Console.WriteLine(res.Check().Result);
 
-            Process.Start(new ProcessStartInfo()
+
+            if (res.RawUrl.StartsWith("https://",StringComparison.InvariantCultureIgnoreCase))
             {
-                FileName = res.RawUrl,
-                UseShellExecute = true
-            });
+                Process.Start(new ProcessStartInfo()
+                {
+                    FileName = res.RawUrl,
+                    UseShellExecute = true
+                });
+            }
 
             Console.WriteLine(res.RawUrl);
 

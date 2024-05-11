@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# IDE0011: Agregar llaves
+dotnet_diagnostic.IDE0011.severity = silent

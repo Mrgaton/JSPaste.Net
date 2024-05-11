@@ -175,8 +175,8 @@ namespace JSPasteNet
     public class DocumentSettings
     {
         public static int? DefaultKeyLength { get; set; }
-        public static string DefaultSecret { get; set; }
-        public static string DefaultPassword { get; set; }
+        public static string? DefaultSecret { get; set; }
+        public static string? DefaultPassword { get; set; }
         public static TimeSpan? DefaultLifeTime { get; set; }
 
         public DocumentSettings()
