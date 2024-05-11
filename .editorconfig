@@ -2,3 +2,6 @@
 
 # IDE0011: Agregar llaves
 dotnet_diagnostic.IDE0011.severity = silent
+
+# IDE0022: Usar cuerpo del bloque para el método
+dotnet_diagnostic.IDE0022.severity = none

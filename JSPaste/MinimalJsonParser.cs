@@ -15,7 +15,7 @@ namespace JSPasteNet
         {
             var stringsParsed = ParseElements(json);
 
-            var result = new Dictionary<string, object>();
+            Dictionary<string, object> result = new();
 
             foreach (var element in stringsParsed)
             {
@@ -35,19 +35,20 @@ namespace JSPasteNet
 
                 //Console.WriteLine(element.Key + " | " + (object)value);
 
-                result.Add(element.Key, (object)value);
+                result.Add(element.Key, value);
             }
 
             return result;
         }
 
-        private static List<object> ParseArray(string arr)
+        private static List<object>? ParseArray(string arr)
         {
             var sr = new StringStream(CutEdges(arr.Trim()));
-            var elements = new List<string>();
+            List<string> elements = [];
+
             while (sr.LeftLength > 0) elements.Add(ReadValue(ref sr));
 
-            List<dynamic> list = new List<dynamic>();
+            List<dynamic> list = [];
 
             if (elements.Count <= 0) return null;
 
@@ -77,7 +78,7 @@ namespace JSPasteNet
         {
             var dict = new Dictionary<string, string>();
 
-            var sr = new StringStream(json);
+            StringStream sr = new(json);
 
             sr.ReadUntil('{');
 
@@ -109,8 +110,8 @@ namespace JSPasteNet
                 if (c == '\"' && lastChar != '\\') inQuotes = !inQuotes;
                 if (c == ',' && subElements == 0 && !inQuotes) break;
 
-                if (c == '{' || c == '[') subElements++;
-                if (c == '}' || c == ']') subElements--;
+                if (c is '{' or '[') subElements++;
+                if (c is '}' or ']') subElements--;
 
                 if (subElements < 0) break;
 
@@ -122,7 +123,7 @@ namespace JSPasteNet
 
         private static string CleanString(string str)
         {
-            StringBuilder output = new StringBuilder();
+            StringBuilder output = new();
             for (int i = 0; i < str.Length; i++) output.Append(str[i] == '\\' ? str[i += 1] : str[i]);
             return output.ToString();
         }
@@ -135,12 +136,12 @@ namespace JSPasteNet
         {
             public StringStream(string str, Encoding enc = null)
             {
-                var data = (enc ?? Encoding.UTF8).GetBytes(str);
+                byte[] data = (enc ?? Encoding.UTF8).GetBytes(str);
                 Write(data, 0, data.Length);
                 Position = 0;
             }
 
-            public long LeftLength { get => Length - Position; }
+            public long LeftLength => Length - Position;
 
             public char ReadChar()
             {
@@ -151,7 +152,7 @@ namespace JSPasteNet
 
             public string ReadUntil(char c)
             {
-                StringBuilder sb = new StringBuilder();
+                StringBuilder sb = new();
                 char f;
                 while (LeftLength > 0 && (f = ReadChar()) != c) sb.Append(f);
                 return sb.ToString();

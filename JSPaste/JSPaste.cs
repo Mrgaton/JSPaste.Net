@@ -52,7 +52,7 @@ namespace JSPasteNet
                 if (settings != null)
                 {
                     if (settings.Key != null) req.Headers.Add("key", settings.Key);
-                    if (settings.KeyLength != null && settings.KeyLength > 0) req.Headers.Add("keyLength", settings.KeyLength.ToString());
+                    if (settings.KeyLength is > 0) req.Headers.Add("keyLength", settings.KeyLength.ToString());
                     if (settings.Secret != null) req.Headers.Add("secret", settings.Secret);
                     if (settings.Password != null) req.Headers.Add("password", settings.Password);
                     if (settings.LifeTime.TotalSeconds > 0) req.Headers.Add("lifetime", ((long)settings.LifeTime.TotalSeconds).ToString());
@@ -66,9 +66,9 @@ namespace JSPasteNet
 
                     var response = MinimalJsonParser.ParseJson(responseString);
 
-                    if ((int)res.StatusCode >= 400) throw new Exception(responseString);
+                    if ((int)res.StatusCode >= 400) throw new HttpRequestException(responseString);
 
-                    return new JSDocument((string)response["key"], (string)response["secret"], (settings != null ? settings.Password : null));
+                    return new JSDocument((string)response["key"], (string)response["secret"], settings?.Password ?? null);
                 }
             }
         }
