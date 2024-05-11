@@ -38,7 +38,7 @@ namespace JSPasteNet
         {
            Timeout = TimeSpan.FromSeconds(30),
            DefaultRequestHeaders = {
-                { "User-Agent", "JSPaste-CS Client V" + LibVersion.ToString() }
+                { "User-Agent", "JSPaste-CS Client V" + LibVersion }
            }
         };
 
