@@ -8,7 +8,7 @@ namespace JSPasteNet
 {
     public static class JSPasteClient
     {
-        public static Encoding DefaultEncoding = Encoding.UTF8;
+        public static Encoding DefaultEncoding { get; set; } = Encoding.UTF8;
 
 #if DEBUG
         private const bool WriteResponses = true;
@@ -16,7 +16,7 @@ namespace JSPasteNet
         private const bool WriteResponses = false;
 #endif
 
-        private static string _serverEndPoint = "https://jspaste.eu/api/v2/documents/";
+        private static string _serverEndPoint = "https://jspaste.eu/api/documents";
 
         public static string ServerEndPoint
         {
@@ -24,11 +24,11 @@ namespace JSPasteNet
 
             set
             {
-                string start = (!value.StartsWith("http", StringComparison.InvariantCultureIgnoreCase) ? "https://" : null);
+                string start = !value.StartsWith("http", StringComparison.InvariantCultureIgnoreCase) ? "https://" : string.Empty;
 
-                _serverEndPoint = start + value.TrimEnd('/') + (value.TrimEnd('/').EndsWith("/documents") ? null : "/documents");
+                _serverEndPoint = start + value.TrimEnd('/') + (value.TrimEnd('/').EndsWith("/api/v2/documents", StringComparison.InvariantCultureIgnoreCase) ? null : "/api/v2/documents");
 
-                if (!_serverEndPoint.EndsWith("/")) _serverEndPoint += '/';
+                if (_serverEndPoint[_serverEndPoint.Length - 1] == '/') _serverEndPoint.Substring(0, ServerEndPoint.Length - 2);
             }
         }
 
@@ -44,7 +44,7 @@ namespace JSPasteNet
 
         public static async Task<JSDocument> Publish(byte[] data, DocumentSettings? settings = default)
         {
-            using (HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Post, _serverEndPoint))
+            using (HttpRequestMessage req = new(HttpMethod.Post, _serverEndPoint))
             {
                 req.Content = new ByteArrayContent(data);
 
@@ -85,8 +85,9 @@ namespace JSPasteNet
 
         public static async Task<byte[]> GetRaw(string key, string? password = null)
         {
-            using (var req = new HttpRequestMessage(HttpMethod.Get, _serverEndPoint + key + "/raw"))
+            using (HttpRequestMessage req = new (HttpMethod.Get, _serverEndPoint + '/' +  key + "/raw"))
             {
+                if (password == null && DocumentSettings.DefaultPassword != null) password = DocumentSettings.DefaultPassword;
                 if (password != null) req.Headers.TryAddWithoutValidation("password", password);
 
                 using (HttpResponseMessage res = await SendAsync(req))
@@ -100,7 +101,7 @@ namespace JSPasteNet
 
         public static async Task<bool> Remove(string key, string secret)
         {
-            using (HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Delete, _serverEndPoint + key))
+            using (HttpRequestMessage req = new (HttpMethod.Delete, _serverEndPoint + key))
             {
                 req.Headers.TryAddWithoutValidation("secret", secret);
 
@@ -115,19 +116,25 @@ namespace JSPasteNet
             }
         }
 
-        public static async Task<bool> Edit(JSDocument doc, string data) => await Edit(data, doc.Key, doc.Secret);
 
-        public static async Task<bool> Edit(string key, string secret, string data) => await Edit(key, secret, DefaultEncoding.GetBytes(data));
+        public static async Task<bool> Edit(string key, string secret, string data) => await Edit(new JSDocument(key, secret), data);
+        public static async Task<bool> Edit(string key, string secret, byte[] data) => await Edit(new JSDocument(key, secret), data);
 
-        public static async Task<bool> Edit(JSDocument doc, byte[] data) => await Edit(doc.Key, doc.Secret, data);
+        public static async Task<bool> Edit(string key, string secret, string password, string data) => await Edit(new JSDocument(key, secret, password), data);
+        public static async Task<bool> Edit(string key, string secret, string password, byte[] data) => await Edit(new JSDocument(key, secret, password), data);
 
-        public static async Task<bool> Edit(string key, string secret, byte[] data)
+        public static async Task<bool> Edit(JSDocument doc, string data) => await Edit(doc, DefaultEncoding.GetBytes(data));
+
+        public static async Task<bool> Edit(JSDocument doc, byte[] data)
         {
-            using (HttpRequestMessage req = new HttpRequestMessage(new HttpMethod("PATCH"), _serverEndPoint + key))
+            using (HttpRequestMessage req = new (new HttpMethod("PATCH"), _serverEndPoint + doc.Key))
             {
                 req.Content = new ByteArrayContent(data);
 
-                req.Headers.TryAddWithoutValidation("secret", secret);
+                req.Headers.TryAddWithoutValidation("secret", doc.Secret);
+
+                if (doc.Password != null) 
+                    req.Headers.TryAddWithoutValidation("password", doc.Password);
 
                 using (HttpResponseMessage res = await SendAsync(req))
                 {
@@ -144,7 +151,7 @@ namespace JSPasteNet
 
         public static async Task<bool> Check(string key)
         {
-            using (HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Get, _serverEndPoint + key + "/exists"))
+            using (HttpRequestMessage req = new (HttpMethod.Get, _serverEndPoint + key + "/exists"))
             {
                 using (HttpResponseMessage res = await SendAsync(req))
                 {
@@ -167,10 +174,10 @@ namespace JSPasteNet
 
     public class DocumentSettings
     {
-        public static int? DefaultKeyLength = null;
-        public static string DefaultSecret = null;
-        public static string DefaultPassword = null;
-        public static TimeSpan? DefaultLifeTime = null;
+        public static int? DefaultKeyLength { get; set; }
+        public static string DefaultSecret { get; set; }
+        public static string DefaultPassword { get; set; }
+        public static TimeSpan? DefaultLifeTime { get; set; }
 
         public DocumentSettings()
         {
@@ -201,9 +208,9 @@ namespace JSPasteNet
 
         public string? Password { get; set; }
 
-        public string Url => JSPasteClient.ServerEndPoint + this.Key + (string.IsNullOrEmpty(Password) ? null : "/?p=" + this.Password);
+        public string Url => JSPasteClient.ServerEndPoint + this.Key + (string.IsNullOrEmpty(Password) ? null : "?p=" + this.Password);
 
-        public string RawUrl => JSPasteClient.ServerEndPoint + this.Key + "/raw" + (string.IsNullOrEmpty(Password) ? null : "/?p=" + this.Password);
+        public string RawUrl => JSPasteClient.ServerEndPoint + this.Key + "/raw" + (string.IsNullOrEmpty(Password) ? null : "?p=" + this.Password);
 
         public async Task<string> Content() => await JSPasteClient.Get(this);
 
@@ -218,18 +225,11 @@ namespace JSPasteNet
             return await JSPasteClient.Remove(_key, secret);
         }
 
-        public async Task<bool> Edit(string data) => await Edit(data, _secret);
+        public async Task<bool> Edit(string data) => await JSPasteClient.Edit(this ,data);
+        public async Task<bool> Edit(byte[] data) => await JSPasteClient.Edit(this ,data);
 
-        public async Task<bool> Edit(string data, string secret) => await Edit(Encoding.UTF8.GetBytes(data), secret);
-
-        public async Task<bool> Edit(byte[] data) => await Edit(data, _secret);
-
-        public async Task<bool> Edit(byte[] data, string secret)
-        {
-            if (secret == null) throw new ArgumentNullException(nameof(secret));
-
-            return await JSPasteClient.Edit(_key, secret, data);
-        }
+        public async Task<bool> Edit(string data, string secret, string? password = null) => await JSPasteClient.Edit(_key, secret,password,data);
+        public async Task<bool> Edit(byte[] data, string secret, string? password = null) => await JSPasteClient.Edit(_key, secret, password, data);
 
         public async Task<bool> Check() => await JSPasteClient.Check(this);
 
@@ -255,7 +255,7 @@ namespace JSPasteNet
 
         public async Task<int> GetHashCodeAsync()
         {
-            using (var hashAlgorithm = MD5.Create())
+            using (MD5 hashAlgorithm = MD5.Create())
             {
                 return BitConverter.ToInt32(hashAlgorithm.ComputeHash(await this.ContentRaw()), 0);
             }

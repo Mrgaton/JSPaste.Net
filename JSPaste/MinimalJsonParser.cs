@@ -7,7 +7,10 @@ namespace JSPasteNet
 {
     public class MinimalJsonParser
     {
+        //CLass by mrgaton please if you use it give me credirs or something or at least dont remove this comment
+
         //Should return dynamic but i guess that Net Standard 2.0 doest support it ¯\_(ツ)_/¯
+
         public static Dictionary<string, object> ParseJson(string json)
         {
             var stringsParsed = ParseElements(json);

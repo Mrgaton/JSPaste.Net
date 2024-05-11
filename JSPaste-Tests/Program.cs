@@ -11,10 +11,11 @@ namespace JSPaste_Tests
         {
             JSPasteNet.JSPasteClient.ServerEndPoint = "http://[::1]:4000";
             //JSPasteNet.JSPasteClient.ServerEndPoint = "https://api.inetol.net/jspaste/v2";
+            
+            //var data = File.ReadAllBytes("C:\\Users\\Mrgaton\\Mega\\Programas\\Programas de CSharp\\AsciiPlayer\\AsciiPlayer\\bin\\Debug\\buffer.txt");
+            var data = File.ReadAllBytes("C:\\Users\\mrgaton\\Downloads\\IMG20240415184420.jpg");
 
-            var data = "RFNGaWxlcy5kZXBzLmpzb24:HwDEuKFYLw76_x8CBDlUXI2cBOQB/-v8fAgQ5VFy1HAR4AQ:biAEao-VEhA:yMIXhemQjfynk3XXsFa45rx3wg3ADFLkqxE3p6PNBtnwhU5Qsall9M8y8XQBuN8K9wwR"; //File.ReadAllBytes("C:\\Users\\Mrgaton\\Downloads\\SKlauncher-3.2.exe");
-
-            //DocumentSettings.DefaultLifeTime = TimeSpan.FromMinutes(1);
+            DocumentSettings.DefaultLifeTime = TimeSpan.FromMinutes(1);
             DocumentSettings.DefaultKeyLength = 20;
             DocumentSettings.DefaultSecret = "un chiste";
             DocumentSettings.DefaultPassword = "chiste";
@@ -22,9 +23,14 @@ namespace JSPaste_Tests
             var res = JSPasteClient.Publish(data, new()
             {
                 LifeTime = TimeSpan.MaxValue,
+                //Key = "gato-con-gafas"
             }).Result;
 
             Console.WriteLine();
+
+            var serverData = res.ContentRaw().Result;
+
+            if (!serverData.SequenceEqual(data)) throw new Exception("raw roto de nuevo 💨");
 
             Console.WriteLine(res.Content().Result);
             Console.WriteLine(res.GetHashCode());
@@ -46,11 +52,13 @@ namespace JSPaste_Tests
 
             Process.Start(new ProcessStartInfo()
             {
-                FileName = res.Url,
+                FileName = res.RawUrl,
                 UseShellExecute = true
             });
 
-            Console.ReadLine();
+            Console.WriteLine(res.RawUrl);
+
+            /*Console.ReadLine();
 
             for (int i = 0; i < 929; i++)
             {
@@ -63,7 +71,7 @@ namespace JSPaste_Tests
                 //Console.WriteLine(Encoding.UTF8.GetString(doc));
 
                 Thread.Sleep(1000);
-            }
+            }*/
         }
     }
 }
