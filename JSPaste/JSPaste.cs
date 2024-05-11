@@ -34,7 +34,7 @@ namespace JSPasteNet
             }
         }
 
-        public static HttpClient httpClient { get; set; } = new HttpClient()
+        public static HttpClient HttpClient { get; set; } = new HttpClient
         {
            Timeout = TimeSpan.FromSeconds(30),
            DefaultRequestHeaders = {
@@ -175,7 +175,7 @@ namespace JSPasteNet
         {
             //Por si acaso en algun futuro tengo que modificar todas las requests que salen de la lib
 
-            return await httpClient.SendAsync(req);
+            return await HttpClient.SendAsync(req);
         }
     }
 
