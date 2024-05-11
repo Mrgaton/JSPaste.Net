@@ -7,6 +7,6 @@
 
 A lib to interact with JSPaste API
 
-# Installation
+## Installation
 
 Install `dotnet add package JSPaste.Net`
