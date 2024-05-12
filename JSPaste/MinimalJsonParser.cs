@@ -115,7 +115,9 @@ namespace JSPasteNet
 
                 if (subElements < 0) break;
 
-                sb.Append(lastChar = c);
+                lastChar = c;
+
+                sb.Append(lastChar);
             }
 
             return sb.ToString().Trim();

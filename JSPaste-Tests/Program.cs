@@ -12,7 +12,7 @@ namespace JSPaste_Tests
             //JSPasteNet.JSPasteClient.ServerEndPoint = "https://api.inetol.net/jspaste/v2";
 
             //var data = File.ReadAllBytes("C:\\Users\\Mrgaton\\Mega\\Programas\\Programas de CSharp\\AsciiPlayer\\AsciiPlayer\\bin\\Debug\\buffer.txt");
-            var data = File.ReadAllBytes("C:\\Users\\mrgaton\\Downloads\\IMG20240415184420.jpg");
+            var data = File.ReadAllBytes(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),"Downloads\\IMG20240415184420.jpg"));
 
             DocumentSettings.DefaultLifeTime = TimeSpan.FromMinutes(1);
             DocumentSettings.DefaultKeyLength = 20;
