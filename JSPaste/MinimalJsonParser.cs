@@ -13,11 +13,11 @@ namespace JSPasteNet
 
         public static Dictionary<string, object> ParseJson(string json)
         {
-            var stringsParsed = ParseElements(json);
+            Dictionary<string, string> stringsParsed = ParseElements(json);
 
-            Dictionary<string, object> result = new();
+            Dictionary<string, object> result = [];
 
-            foreach (var element in stringsParsed)
+            foreach (KeyValuePair<string, string> element in stringsParsed)
             {
                 string content = element.Value;
 
@@ -43,7 +43,7 @@ namespace JSPasteNet
 
         private static List<object>? ParseArray(string arr)
         {
-            var sr = new StringStream(CutEdges(arr.Trim()));
+            StringStream sr = new(CutEdges(arr.Trim()));
             List<string> elements = [];
 
             while (sr.LeftLength > 0) elements.Add(ReadValue(ref sr));
@@ -60,7 +60,7 @@ namespace JSPasteNet
             else if (FirstAndLastEqualTo(elements[0], '{', '}')) structType = 4;
             else if (FirstAndLastEqualTo(elements[0], '[', ']')) structType = 5;
 
-            foreach (var element in elements)
+            foreach (string element in elements)
             {
                 if (structType == 1) list.Add(CleanString(CutEdges(element)));
                 else if (structType == 2) list.Add(long.Parse(element));
@@ -76,7 +76,7 @@ namespace JSPasteNet
 
         private static Dictionary<string, string> ParseElements(string json)
         {
-            var dict = new Dictionary<string, string>();
+            Dictionary<string, string> dict = [];
 
             StringStream sr = new(json);
 
@@ -97,7 +97,7 @@ namespace JSPasteNet
 
         private static string ReadValue(ref StringStream sr)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             int subElements = 0;
             char lastChar = default;
@@ -136,7 +136,7 @@ namespace JSPasteNet
 
         private sealed class StringStream : MemoryStream
         {
-            public StringStream(string str, Encoding enc = null)
+            public StringStream(string str, Encoding? enc = null)
             {
                 byte[] data = (enc ?? Encoding.UTF8).GetBytes(str);
                 Write(data, 0, data.Length);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
@@ -34,10 +35,15 @@ namespace JSPasteNet
             }
         }
 
-        public static HttpClient HttpClient { get; set; } = new HttpClient
+        public static HttpClient client { get; set; } = new HttpClient(new HttpClientHandler()
         {
-           Timeout = TimeSpan.FromSeconds(30),
-           DefaultRequestHeaders = {
+            AutomaticDecompression = DecompressionMethods.Deflate,
+            CookieContainer = new CookieContainer(),
+            AllowAutoRedirect = true
+        })
+        {
+            Timeout = TimeSpan.FromSeconds(30),
+            DefaultRequestHeaders = {
                 { "User-Agent", "JSPaste-CS Client V" + LibVersion }
            }
         };
@@ -66,7 +72,7 @@ namespace JSPasteNet
 
                     if (WriteResponses) Console.WriteLine(responseString);
 
-                    var response = MinimalJsonParser.ParseJson(responseString);
+                    System.Collections.Generic.Dictionary<string, object> response = MinimalJsonParser.ParseJson(responseString);
 
                     if ((int)res.StatusCode >= 400) throw new HttpRequestException(responseString);
 
@@ -101,7 +107,8 @@ namespace JSPasteNet
 
         public static async Task<bool> Remove(JSDocument doc)
         {
-            if (string.IsNullOrWhiteSpace(doc.Password)) throw new ArgumentException(nameof(doc.Secret));
+            if (string.IsNullOrWhiteSpace(doc.Password)) throw new ArgumentException(nameof(doc.Password));
+            if (doc.Secret == null) throw new ArgumentException(nameof(doc.Secret));
 
             return await Remove(doc.Key, doc.Secret);
         }
@@ -175,7 +182,7 @@ namespace JSPasteNet
         {
             //Por si acaso en algun futuro tengo que modificar todas las requests que salen de la lib
 
-            return await HttpClient.SendAsync(req);
+            return await client.SendAsync(req);
         }
     }
 

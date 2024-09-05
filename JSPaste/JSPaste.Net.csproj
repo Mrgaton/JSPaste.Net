@@ -12,13 +12,13 @@
     <PackageProjectUrl>https://jspaste.eu/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Mrgaton/JSPaste-CS</RepositoryUrl>
     <PackageTags>JSPaste; tnfAngel; pastebin; hastebin; </PackageTags>
-    <PackageReleaseNotes>Primera release stable?</PackageReleaseNotes>
+    <PackageReleaseNotes>Small refactor</PackageReleaseNotes>
     <FileVersion>$(VersionPrefix)</FileVersion>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <AssemblyVersion></AssemblyVersion>
-    <Version>0.0.8</Version>
+    <Version>0.0.9</Version>
     <PackageIcon>logo.png</PackageIcon>
     <EnableNETAnalyzers>True</EnableNETAnalyzers>
     <AnalysisLevel>preview-recommended</AnalysisLevel>
